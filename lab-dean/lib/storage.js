@@ -16,10 +16,12 @@ storage.fetchOne = (schema, itemId) => {
 };
 
 storage.fetchAll = (schema) => {
-  fs.readFileProm(`${__dirname}/..data/${schema}/.json`);
+  fs.readFileProm(`${__dirname}/..data/${schema}/`)
+    .then(list => list.map(file => file.split('.')[0]));
 };
 
 storage.update = (schema, itemId, item) => {
+  if (item._id !== itemId) return Promise.reject(new Error('Validation Error: Cannot find Item ID'));
   let json = JSON.stringify(item);
   return fs.writeFileProm(`${__dirname}/../data/${schema}/${itemId}.json`, json)
     .then(() => item);
