@@ -4,29 +4,13 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'), {suffix: 'Prom'});
 
 const storage = module.exports = {};
+const basePath = `${__dirname}/../data`;
 
-storage.create = (schema, item) => {
-  let json = JSON.stringify(item);
-  return fs.writeFileProm(`${__dirname}/../data/${schema}/${item._id}.json`, json)
-    .then(() => item);
-};
+let writer = (schema, id, json) => fs.writeFileProm(`${basePath}/${schema}/${id}.json`, json);
+let reader = (schema, id) => fs.readFileProm(`${basePath}/${schema}/${id}.json`);
 
-storage.fetchOne = (schema, itemId) => {
-  fs.readFileProm(`${__dirname}/..data/${schema}/${itemId}.json`);
-};
-
-storage.fetchAll = (schema) => {
-  fs.readFileProm(`${__dirname}/..data/${schema}/`)
-    .then(list => list.map(file => file.split('.')[0]));
-};
-
-storage.update = (schema, itemId, item) => {
-  if (item._id !== itemId) return Promise.reject(new Error('Validation Error: Cannot find Item ID'));
-  let json = JSON.stringify(item);
-  return fs.writeFileProm(`${__dirname}/../data/${schema}/${itemId}.json`, json)
-    .then(() => item);
-};
-
-storage.delete = (schema, itemId) => {
-  return fs.unlinkProm(`${__dirname}/../data/${schema}${itemId}.json`);
-};
+storage.create = (schema, id, item) => writer(schema, id, item);
+storage.fetchOne = (schema, itemId) => reader(schema, itemId);
+storage.fetchAll = (schema) => fs.readdirProm(`${basePath}/${schema}`);
+storage.update = (schema, itemId, item) => writer(schema, itemId, item);
+storage.delete = (schema, itemId) => fs.unlinkProm(`${basePath}/${schema}${itemId}.json`);
