@@ -33,6 +33,6 @@ module.exports = function(router) {
       .catch(err => errorHandler(err, res));
   });
   router.delete('/note/:_id', (req, res) => {
-    storage.delete('note', req.params.id)
+    storage.delete('note', req.params.id);
   });
 };
